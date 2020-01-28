@@ -1,0 +1,39 @@
+
+version: '3'
+
+services:
+  web:
+    container_name: web
+    build: ./docker
+    ports:
+      - 80:80
+    privileged: true
+    volumes:
+      - ./server:/var/www/html
+
+  db:
+    image: mysql:5.7
+    container_name: db-host
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: docker-database
+      MYSQL_USER: docker
+      TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./docker/db/data:/var/lib/mysql
+      - ./docker/db/my.conf:/etc/mysql/conf.d/mt.conf
+      - ./docker/db/sql:/docker-entrypoint-initdb.d
+    ports:
+      - 3305:3305
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOSTS=db-host
+      - PMA_USER=root
+      - PWA_PASSWORD=root
+    ports:
+    - 8080:80
